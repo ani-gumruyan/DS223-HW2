@@ -2,13 +2,14 @@
   Run this file at first, in order to see what is it printng. 
   Instead of the print() use the respective log level.
 """
-# LOGGER
-import pandas as pd
-import matplotlib.pyplot as plt
-import numpy as np
 import csv
 import random
+import numpy as np
+import pandas as pd
 from scipy.stats import beta
+import matplotlib.pyplot as plt
+
+# LOGGER
 from abc import ABC, abstractmethod
 from logs import *
 
@@ -62,7 +63,6 @@ class Visualization():
 
     def plot1(self, e_greedy_rewards, thompson_rewards):
         # Visualize the learning process for each algorithm (plot1())
-        plt.figure(figsize=(12, 6))
 
         # Linear Plot
         plt.subplot(1, 2, 1)
@@ -86,7 +86,7 @@ class Visualization():
         plt.tight_layout()
         plt.show()
 
-    def plot2(self, e_greedy_rewards, thompson_rewards):
+    def plot2(self, e_greedy_rewards, thompson_rewards, Bandit_Reward, NumberOfTrials):
         # Compare E-greedy and thompson sampling cummulative rewards
         # Compare E-greedy and thompson sampling cummulative regrets
         e_greedy_regrets = max(Bandit_Reward) * np.arange(1,
@@ -94,7 +94,6 @@ class Visualization():
         thompson_regrets = max(Bandit_Reward) * np.arange(1,
                                                           NumberOfTrials+1) - np.cumsum(thompson_rewards)
 
-        plt.figure(figsize=(12, 6))
         plt.plot(e_greedy_regrets, label="Epsilon-Greedy Regret")
         plt.plot(thompson_regrets, label="Thompson Sampling Regret")
         plt.title('Cumulative Regrets')
@@ -108,8 +107,8 @@ class Visualization():
         df = pd.DataFrame(data, columns=["Bandit", "Reward", "Algorithm"])
         df.to_csv(filename, index=False)
 
-
 #--------------------------------------#
+
 
 class EpsilonGreedy(Bandit):
 
@@ -138,7 +137,7 @@ class EpsilonGreedy(Bandit):
         self.reward[chosen_bandit] += reward
         return reward
 
-    def experiment(self):
+    def experiment(self, NumberOfTrials):
         cumulative_rewards = []
         total_reward = 0
         for _ in range(NumberOfTrials):
@@ -181,7 +180,7 @@ class ThompsonSampling(Bandit):
         self.beta[chosen_bandit] += max(self.p) - reward
         return reward
 
-    def experiment(self):
+    def experiment(self, NumberOfTrials):
         cumulative_rewards = []
         total_reward = 0
         for _ in range(NumberOfTrials):
@@ -203,36 +202,6 @@ class ThompsonSampling(Bandit):
         print(f"Average Regret for ThompsonSampling: {avg_regret}")
 
 
-Bandit_Reward = [1, 2, 3, 4]
-NumberOfTrials = 20000
-
-
-def comparison():
-    e_greedy = EpsilonGreedy(Bandit_Reward)
-    thompson = ThompsonSampling(Bandit_Reward)
-
-    e_greedy_rewards = e_greedy.experiment()
-    thompson_rewards = thompson.experiment()
-
-    # Save to CSV
-    data = []
-    for i, reward in enumerate(e_greedy_rewards):
-        data.append([i, reward, "Epsilon-Greedy"])
-    for i, reward in enumerate(thompson_rewards):
-        data.append([i, reward, "Thompson Sampling"])
-
-    Visualization().save_to_csv(data)
-
-    # Visualization
-    viz = Visualization()
-    viz.plot1(e_greedy_rewards, thompson_rewards)
-    viz.plot2(e_greedy_rewards, thompson_rewards)
-
-    # Report
-    e_greedy.report()
-    thompson.report()
-
-
 if __name__ == '__main__':
 
     logger.debug("debug message")
@@ -240,6 +209,3 @@ if __name__ == '__main__':
     logger.warning("warning message")
     logger.error("error message")
     logger.critical("critical message")
-
-# HW2 Output
-comparison()
